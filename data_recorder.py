@@ -8,8 +8,8 @@ import carla
 
 from param import *
 from recorder.actor_tree import ActorTree
-from utils.transform import Transform, Location, Rotation
-from utils.transform import transform_to_carla_transform
+from carla_dataset_tools.utils.transform import Transform, Location, Rotation
+from carla_dataset_tools.utils.transform import transform_to_carla_transform
 
 sig_interrupt = False
 
@@ -147,7 +147,7 @@ def main():
     argparser.add_argument(
         '-w', '--world_config_file',
         metavar='W',
-        default='world_config_template.json',
+        default='world_config_RDDPS.json',
         type=str,
         help='World configuration file')
     args = argparser.parse_args()

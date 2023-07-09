@@ -2,7 +2,7 @@
 
 import carla
 import open3d as o3d
-from utils.geometry_types import *
+from carla_dataset_tools.utils.geometry_types import *
 
 
 def carla_location_to_numpy_vec(carla_location: carla.Location) -> numpy.array:

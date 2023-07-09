@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 import carla
-from utils.transform import *
+from carla_dataset_tools.utils.transform import *
 
 
 class PseudoActor(object):

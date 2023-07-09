@@ -7,8 +7,8 @@ import transforms3d
 import math
 
 from recorder.sensor import Sensor
-from utils.geometry_types import Transform, Rotation
-from utils.transform import carla_transform_to_transform
+from carla_dataset_tools.utils.geometry_types import Transform, Rotation
+from carla_dataset_tools.utils.transform import carla_transform_to_transform
 
 
 class CameraBase(Sensor):
@@ -91,6 +91,12 @@ class RgbCamera(CameraBase):
                  color_converter: carla.ColorConverter = None):
         super().__init__(uid, name, base_save_dir, parent, carla_actor, color_converter)
 
+
+class RgbCameraBbox(CameraBase):
+    def __init__(self, uid, name: str, base_save_dir: str, parent, carla_actor: carla.Sensor,
+                 color_converter: carla.ColorConverter = None):
+        super().__init__(uid, name, base_save_dir, parent, carla_actor, color_converter)
+    
 
 class SemanticSegmentationCamera(CameraBase):
     def __init__(self, uid, name: str, base_save_dir: str, parent, carla_actor: carla.Sensor,

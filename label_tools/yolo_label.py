@@ -21,6 +21,12 @@ def gather_yolo_data(record_name: str, vehicle_name: str, rgb_camera_name: str, 
     yolo_rawdata_df['semantic_image_path'] = semantic_image_path_list
     yolo_rawdata_df['record_name'] = record_name
     yolo_rawdata_df['vehicle_name'] = vehicle_name
+
+    # Adding train/valid/test splits
+    np.random.seed(42)
+    yolo_rawdata_df['random_number'] = np.random.rand(len(yolo_rawdata_df))
+    yolo_rawdata_df['split'] = yolo_rawdata_df['random_number'].apply(lambda x: 'train' if x < 0.7 else 'val' if x < 0.9 else 'test')
+    yolo_rawdata_df = yolo_rawdata_df.drop('random_number', axis=1)
     return yolo_rawdata_df
 
 
@@ -31,12 +37,23 @@ class YoloLabelTool:
         self.debug = False
 
     def process(self, rawdata_df: pd.DataFrame):
+        for split_name in rawdata_df["split"].unique():
+            output_dir = f"{DATASET_PATH}"
+            split_df = rawdata_df[rawdata_df['split'] == split_name]
+            frame_names = split_df['rgb_image_path'].apply(get_filename_from_fullpath)
+            with open(os.path.join(output_dir, f'{split_name}_yolo.txt'), 'a') as f:
+                for i, frame_name in enumerate(frame_names):
+                    filename = split_df["vehicle_name"].iloc[i] + frame_name
+                    f.write(f'./images/{split_name}/{filename}.png\n')
+
         start = time.time()
         pool = ProcessPool()
         pool.starmap(self.process_frame, rawdata_df.iterrows())
         pool.close()
         pool.join()
         print("cost: {:0<3f}s".format(time.time() - start))
+
+
 
         # start = time.time()
         # for index, frame in rawdata_df.iterrows():
@@ -50,7 +67,8 @@ class YoloLabelTool:
         if not success:
             return
 
-        output_dir = f"{DATASET_PATH}/{frame['record_name']}/{frame['vehicle_name']}/yolo"
+        # output_dir = f"{DATASET_PATH}/{frame['record_name']}/{frame['vehicle_name']}/yolo"
+        output_dir = f"{DATASET_PATH}"
         frame_id = get_filename_from_fullpath(rgb_img_path)
 
         image_rgb = None
@@ -78,7 +96,12 @@ class YoloLabelTool:
             # cv2.imshow("seg", self.preview_img)
             # cv2.imshow("mono", mono_img)
             # cv2.waitKey()
-            contours, _ = cv2.findContours(mono_img, cv2.RETR_TREE, cv2.CHAIN_APPROX_NONE)
+            # bordered_image = cv2.copyMakeBorder(mono_img, top=10, bottom=10, left=10, right=10, 
+            #                         borderType=cv2.BORDER_CONSTANT, value=[0,0,0])
+
+            # contours, _ = cv2.findContours(bordered_image, cv2.RETR_TREE, cv2.CHAIN_APPROX_NONE)
+
+            contours, _ = cv2.findContours(mono_img, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
             labels = []
             for cnt in contours:
                 x, y, w, h = cv2.boundingRect(cnt)
@@ -88,8 +111,10 @@ class YoloLabelTool:
                 # cv2.imshow("rect", self.preview_img)
                 # cv2.waitKey()
                 max_y, max_x, _ = image_rgb.shape
-                if y + h >= max_y or x + w >= max_x:
-                    continue
+                
+                # UNCOMMENT TO IGNORE BBOX THAT TOUCH THE EDGES
+                # if y + h >= max_y or x + w >= max_x:
+                #     continue
 
                 if coco_id == TL_LIGHT_LABEL["DEFAULT"]:
                     coco_id = check_color(image_rgb[y:y + h, x:x + w, :])
@@ -117,8 +142,8 @@ class YoloLabelTool:
         if len(labels_all) > 0:
 
             # print("Label output path: {}".format(self.label_out_path))
-            write_image(output_dir, frame_id, image_rgb)
-            write_label(output_dir, frame_id, labels_all)
+            write_image(output_dir, frame_id, image_rgb, frame["vehicle_name"], frame["split"])
+            write_label(output_dir, frame_id, labels_all, frame["vehicle_name"], frame["split"])
         write_yaml(output_dir)
         return
 

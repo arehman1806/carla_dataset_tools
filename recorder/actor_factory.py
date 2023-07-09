@@ -8,8 +8,8 @@ from enum import Enum
 import carla
 
 from param import RAW_DATA_PATH, ROOT_PATH
-from utils.geometry_types import *
-from utils.transform import transform_to_carla_transform
+from carla_dataset_tools.utils.geometry_types import *
+from carla_dataset_tools.utils.transform import transform_to_carla_transform
 
 from recorder.actor import Actor, PseudoActor
 from recorder.camera import RgbCamera, DepthCamera, SemanticSegmentationCamera

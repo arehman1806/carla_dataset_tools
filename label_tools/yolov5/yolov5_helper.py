@@ -13,27 +13,28 @@ import yaml
 
 
 class YoloConfig:
-    rectangle_pixels_min = 150
+    rectangle_pixels_min = 50
     color_pixels_min = 30
 
 
 LABEL_DATAFRAME = pd.DataFrame(columns=['raw_value', 'color', 'coco_names_index'],
                                data=[
-                                     # [ 4, (220, 20, 60), 0],
-                                     [18, (250, 170, 30), 9],
-                                     [12, (220, 220,  0), 80],
+                                    #  [ 4, (220, 20, 60), 0],
+                                     [10, (0, 0, 142), 0],
+                                    #  [18, (250, 170, 30), 9],
+                                    #  [12, (220, 220,  0), 80],
                                ])
 
 TL_LIGHT_LABEL = {'DEFAULT': 9,
                   'RED': 82,
                   'GREEN': 81}
 
-LABEL_COLORS = np.array([
-    # (220, 20, 60),   # Pedestrian
-    # (0, 0, 142),     # Vehicle
-    (220, 220, 0),   # TrafficSign -> COCO INDEX
-    (250, 170, 30),  # TrafficLight
-])
+# LABEL_COLORS = np.array([
+#     # (220, 20, 60),   # Pedestrian
+#     # (0, 0, 142),     # Vehicle
+#     (220, 220, 0),   # TrafficSign -> COCO INDEX
+#     (250, 170, 30),  # TrafficLight
+# ])
 
 COCO_NAMES = ['person', 'bicycle', 'car', 'motorcycle', 'airplane', 'bus', 'train', 'truck', 'boat',
               'traffic light', 'fire hydrant', 'stop sign', 'parking meter', 'bench', 'bird', 'cat', 'dog',
@@ -104,7 +105,7 @@ def write_yaml(output_path):
         'path': 'yolo_dataset',
         'train': 'images/train',
         'val': 'images/train',
-        'test': '',
+        'test': 'images/test',
         'nc': len(COCO_NAMES),
         'names': COCO_NAMES
     }
@@ -112,16 +113,18 @@ def write_yaml(output_path):
         yaml.dump(dict_file, file)
 
 
-def write_image(output_path: str, frame_id: str, image_rgb: np.array):
-    image_dir = f"{output_path}/yolo_dataset/images/train"
+def write_image(output_path: str, frame_id: str, image_rgb: np.array, vehicle="", split="train"):
+    image_dir = f"{output_path}/images/{split}"
     os.makedirs(image_dir, exist_ok=True)
-    cv2.imwrite(f"{image_dir}/{frame_id}.jpg", image_rgb)
+    filename = vehicle + frame_id
+    cv2.imwrite(f"{image_dir}/{filename}.png", image_rgb)
 
 
-def write_label(output_path: str, frame_id: str, labels: list):
-    label_dir = f"{output_path}/yolo_dataset/labels/train"
+def write_label(output_path: str, frame_id: str, labels: list, vehicle="", split="train"):
+    label_dir = f"{output_path}/labels/{split}"
     os.makedirs(label_dir, exist_ok=True)
-    with open(f"{label_dir}/{frame_id}.txt", "w") as f:
+    filename = vehicle + frame_id
+    with open(f"{label_dir}/{filename}.txt", "w") as f:
         for label in labels:
             f.write(label)
             f.write('\n')
