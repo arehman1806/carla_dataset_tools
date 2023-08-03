@@ -12,7 +12,7 @@ from carla_dataset_tools.utils.geometry_types import *
 from carla_dataset_tools.utils.transform import transform_to_carla_transform
 
 from recorder.actor import Actor, PseudoActor
-from recorder.camera import RgbCamera, DepthCamera, SemanticSegmentationCamera
+from recorder.camera import RgbCamera, DepthCamera, SemanticSegmentationCamera, InstanceSegmentationCamera
 from recorder.lidar import Lidar, SemanticLidar
 from recorder.radar import Radar
 from recorder.vehicle import Vehicle, OtherVehicle
@@ -85,7 +85,7 @@ def get_name_from_json(json_info, name_set: set):
     return name
 
 
-def create_spawn_point(x, y, z, roll, pitch, yaw):
+def create_spawn_point(x=0, y=0, z=0, roll=0, pitch=0, yaw=0):
     return transform_to_carla_transform(Transform(Location(x, y, z), Rotation(roll=roll, pitch=pitch, yaw=yaw)))
 
 
@@ -140,7 +140,17 @@ class ActorFactory(object):
                                  base_save_dir=self.base_save_dir)
         world_node = Node(world_actor, NodeType.WORLD)
         return world_node
-
+    
+    def create_ego_vehicle_spawn_point(self, x, y):
+        map = self.world.get_map()
+        wp = map.get_waypoint(carla.Location(x, y, 0),project_to_road=True, lane_type=carla.LaneType.Driving)
+        trans = wp.transform
+        trans.location.z += 5
+        return trans
+    def get_wp(self, location):
+        map = self.world.get_map()
+        wp = map.get_waypoint(location, project_to_road=True, lane_type=carla.LaneType.Driving)
+        return wp
     def create_vehicle_node(self, actor_info):
         vehicle_type = actor_info["type"]
         vehicle_name = get_name_from_json(actor_info, self.v2x_layer_name_set)
@@ -148,13 +158,19 @@ class ActorFactory(object):
         if type(spawn_point) is int:
             transform = self.spawn_points[spawn_point]
         else:
-            transform = create_spawn_point(
-                spawn_point.pop("x", 0.0),
-                spawn_point.pop("y", 0.0),
-                spawn_point.pop("z", 0.0),
-                spawn_point.pop("roll", 0.0),
-                spawn_point.pop("pitch", 0.0),
-                spawn_point.pop("yaw", 0.0))
+            transform = self.create_ego_vehicle_spawn_point(
+                spawn_point[0],
+                spawn_point[1])
+            # tl_loc = carla.Location(actor_info["opposite_tl"][0], actor_info["opposite_tl"][1], 0)
+            # actor_list = self._world.get_actors()
+            # lights_list = actor_list.filter("*traffic_light*")
+            # if tl is not None:
+            #     state = tl.get_state()
+            #     # If it's red or yellow, change it to green
+            #     if state == carla.TrafficLightState.Red or state == carla.TrafficLightState.Yellow:
+            #         tl.set_state(carla.TrafficLightState.Green)
+            #         tl.set_set_green_time(1e9)
+                    
         blueprint = self.blueprint_lib.find(vehicle_type)
         carla_actor = self.world.spawn_actor(blueprint, transform)
         print(vehicle_name)
@@ -256,7 +272,15 @@ class ActorFactory(object):
                                      name=sensor_name,
                                      base_save_dir=parent_actor.get_save_dir(),
                                      carla_actor=carla_actor,
-                                     parent=parent_actor)
+                                     parent=parent_actor,
+                                     world=self.world,
+                                     camera_bp=blueprint)
+        elif sensor_type == 'sensor.camera.instance_segmentation':
+            sensor_actor = InstanceSegmentationCamera(uid=self.generate_uid(),
+                                                      name=sensor_name,
+                                                      base_save_dir=parent_actor.get_save_dir(),
+                                                      carla_actor=carla_actor,
+                                                      parent=parent_actor)
         elif sensor_type == 'sensor.camera.depth':
             sensor_actor = DepthCamera(uid=self.generate_uid(),
                                        name=sensor_name,

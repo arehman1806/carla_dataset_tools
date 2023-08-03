@@ -178,8 +178,8 @@ class BasicAgent(object):
             hazard_detected = True
 
         control = self._local_planner.run_step()
-        if hazard_detected:
-            control = self.add_emergency_stop(control)
+        # if hazard_detected:
+        control = self.add_emergency_stop(control)
 
         return control
 

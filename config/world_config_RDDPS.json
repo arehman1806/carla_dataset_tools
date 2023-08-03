@@ -1,5 +1,5 @@
 {
-    "frame_total": 12000,
+    "frame_total": 500,
     "frame_step": 3,
     "map": "Town03",
     "spectator_pose": {"x": 100, "y": -150.0, "z": 150, "roll": 0, "pitch": 60.0, "yaw": -90.0},
@@ -9,12 +9,12 @@
         "max_substep_delta_time": 0.01,
         "max_substeps": 16
     },
-    "actor_settings": "actor_settings_template.json",
+    "actor_settings": "actor_setting_RDDPS_junction_only.json",
     "traffic_light_setting":
     {
-        "red_time": 2.0,
+        "red_time": 4.0,
         "yellow_time": 0.01,
-        "green_time": 2.0
+        "green_time": 4.0
     }
 
 }

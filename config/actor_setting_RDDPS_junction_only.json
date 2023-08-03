@@ -1,0 +1,29 @@
+{
+    "actors":
+    [
+        {
+            "type": "vehicle.tesla.model3",
+            "name": "vehicle.tesla.model3.master",
+            "sensors_setting": "sensor_config_RDDPS.json",
+            "spawn_point": [-84.3, 119.4],
+            "opposite_tl": [-74.9, 148.7]
+        },
+        {
+            "type": "vehicle.tesla.model3",
+            "sensors_setting": "sensor_config_RDDPS.json",
+            "spawn_point": [2.0, 146.0],
+            "opposite_tl": [-5.9, 114.5]
+        },
+        {
+            "type": "vehicle.tesla.model3",
+            "sensors_setting": "sensor_config_RDDPS.json",
+            "spawn_point": [-77.8, 17.6],
+            "opposite_tl": [ -85.8, -13.4]
+        }
+    ],
+    "other_vehicles":
+    {
+        "vehicle_num": 150,
+        "spawn_points": [44, 55, 64, 39, 58, 10, 95, 3, 13, 100, 5, 26, 25]
+    }
+}

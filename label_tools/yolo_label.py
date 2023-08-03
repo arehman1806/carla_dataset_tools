@@ -101,7 +101,7 @@ class YoloLabelTool:
 
             # contours, _ = cv2.findContours(bordered_image, cv2.RETR_TREE, cv2.CHAIN_APPROX_NONE)
 
-            contours, _ = cv2.findContours(mono_img, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
+            contours, hierarchy = cv2.findContours(mono_img, cv2.RETR_TREE, cv2.CHAIN_APPROX_NONE)
             labels = []
             for cnt in contours:
                 x, y, w, h = cv2.boundingRect(cnt)
@@ -121,9 +121,9 @@ class YoloLabelTool:
 
                 # DEBUG START
                 # Draw label info to image
-                # cv2.putText(preview_img, COCO_NAMES[coco_id], (x, y - 10),
-                #             cv2.FONT_HERSHEY_SIMPLEX, 0.5, (36, 255, 12), 1)
-                # cv2.rectangle(image_rgb, (x, y), (x + w, y + h), (0, 255, 0), 1)
+                cv2.putText(preview_img, COCO_NAMES[coco_id], (x, y - 10),
+                            cv2.FONT_HERSHEY_SIMPLEX, 0.5, (36, 255, 12), 1)
+                cv2.rectangle(image_rgb, (x, y), (x + w, y + h), (0, 255, 0), 1)
                 # DEBUG END
 
                 label_info = "{} {} {} {} {}".format(coco_id,
@@ -135,6 +135,43 @@ class YoloLabelTool:
                 # cv2.imshow("result", self.preview_img)
                 # cv2.imshow("test", self.preview_img[y:y+h, x:x+w, :])
                 # cv2.waitKey()
+
+            # First, generate all bounding boxes with corresponding labels
+            # all_boxes = []
+            # for index, cnt in enumerate(contours):
+            #     x, y, w, h = cv2.boundingRect(cnt)
+            #     if w * h < YoloConfig.rectangle_pixels_min or hierarchy[0][index][3] != -1:
+            #         continue
+            #     max_y, max_x, _ = image_rgb.shape
+            #     all_boxes.append((x, y, w, h, index))
+
+            # # Filter out nested bounding boxes
+            # filtered_boxes = []
+            # for box1 in all_boxes:
+            #     x1, y1, w1, h1, index1 = box1
+            #     if not any((x1 > x2) and (y1 > y2) and (x1 + w1 < x2 + w2) and (y1 + h1 < y2 + h2) for x2, y2, w2, h2, index2 in all_boxes if index1 != index2):
+            #         filtered_boxes.append(box1)
+
+            # # Now filtered_boxes contains only the non-nested boxes.
+            # # We can process these further:
+            # for x, y, w, h, index in filtered_boxes:
+            #     if coco_id == TL_LIGHT_LABEL["DEFAULT"]:
+            #         coco_id = check_color(image_rgb[y:y + h, x:x + w, :])
+
+            #     # DEBUG START
+            #     # Draw label info to image
+            #     cv2.putText(preview_img, COCO_NAMES[coco_id], (x, y - 10),
+            #                 cv2.FONT_HERSHEY_SIMPLEX, 0.5, (36, 255, 12), 1)
+            #     cv2.rectangle(image_rgb, (x, y), (x + w, y + h), (0, 255, 0), 1)
+            #     # DEBUG END
+
+            #     label_info = "{} {} {} {} {}".format(coco_id,
+            #                                         float(x + (w / 2.0)) / width,
+            #                                         float(y + (h / 2.0)) / height,
+            #                                         float(w) / width,
+            #                                         float(h) / height)
+            #     labels.append(label_info)
+
 
             if len(labels) > 0:
                 labels_all += labels

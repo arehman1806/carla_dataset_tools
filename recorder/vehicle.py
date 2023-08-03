@@ -54,7 +54,7 @@ class Vehicle(Actor):
         self.save_dir = '{}/{}'.format(base_save_dir, self.name)
         self.first_tick = True
         # For vehicle control
-        self.use_auto_pilot = True
+        self.use_auto_pilot = False
         self.vehicle_agent = BasicAgent(self.carla_actor)
         # self.vehicle_agent = BehaviorAgent(self.carla_actor)
 
